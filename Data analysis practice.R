@@ -15,23 +15,52 @@ dim(college)
 
 View(college)
 
+summary(college)
+
+college$major_category <- as.factor(college$major_category)
+
 library(dplyr)
 library(ggplot2)
+library(forcats)
+theme_set(theme_light())
 
-college_income <- college %>% 
-     group_by(major_category) %>% 
-     summarise(median_income = median(median)) %>% 
-     arrange(median_income)
+## filter interdisciplinary major category
+college <- college %>% 
+        filter(major_category != "Interdisciplinary")
 
-g <- ggplot(college_income, aes(x = reorder(major_category, median_income), y = median_income, group = 1)) + 
-     geom_line() + 
-     geom_smooth(method = "lm", se = FALSE) + 
-     xlab("Major Category") + 
-     ylab("Income") + 
-     theme(axis.text.x = element_text(angle = 90, hjust = 1))
+## boxplot major category and median (income)
+g <- ggplot(college, aes(x = major_category, y = median)) + 
+        geom_point(cex = 4, alpha = 0.5) + 
+        geom_smooth(method = "lm", lwd = 2, colour = "blue") + 
+        theme(axis.text.x = element_text(angle = 90, hjust = 1))
 g
 
-fit <- lm(median_income ~ major_category - 1, data = college_income)
+## reorder major_category by median
+college %>% 
+        ggplot(aes(x = reorder(major_category, median), y = median, fill = major_category)) + 
+        geom_boxplot() + 
+        xlab("Major Category") + 
+        ylab("Income") + 
+        theme(legend.position = "none") + 
+        theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        
+## linear regression for median ~ major category
+fit <- lm(median ~ major_category, data = college)
 summary(fit)
+
+## p-value > 0.05 -> null hypothesis is not rejected (there is not significant
+## correlation between median income and college major category)
+
+## linear regression for median ~ major category without the intercept
+fit1 <- lm(median ~ major_category - 1, data = college)
+summary(fit1)
+
+## lm without the intercept calculates the median means for each college major category
+
+## Kruskal-Wallis test
+kruskal.test(median ~ major_category, data = college)
+
+## p-value > 0.05 -> null hypothesis is not rejected (there is not significant
+## correlation between median income and college major category)
 
 dance_save("./college_major_analysis.rds")
