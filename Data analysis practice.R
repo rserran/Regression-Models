@@ -57,7 +57,28 @@ summary(fit1)
 
 ## lm without the intercept calculates the median means for each college major category
 
+anova(fit)
+
 ## Kruskal-Wallis test
+## The Kruskal-Wallis test is a nonparametric (distribution free) test and assess
+## for significant differences on a continuous dependent variable by a categorical
+## independent variable
+
+## histogram median
+hist(college$median, breaks = 20)
+
+library(psych)
+describe(college$median)
+
+## skewness is 2.01 and kurtosis is 7.3 (indicating nonnormality)
+
+## Shapiro-Wilk normality test
+shapiro.test(college$median)
+
+## The Shapiro-Wil test results in a p-value of 0. The null hypothesis is rejected
+## (variable distribution is normal) in favor of the alternate (variable distribution
+## is not normal)
+
 kruskal.test(median ~ major_category, data = college)
 
 ## p-value > 0.05 -> null hypothesis is not rejected (there is not significant
